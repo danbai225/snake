@@ -65,28 +65,28 @@ func listeningInput() {
 	EvChan := hook.Start()
 	defer hook.StopEvent()
 	for ev := range EvChan {
-		if ev.Kind == hook.KeyDown && ev.Rawcode == 32 {
+		if ev.Kind == hook.KeyHold && ev.Keycode == 57 {
 			speedUp = true
 		}
-		if ev.Kind == hook.KeyUp && ev.Rawcode == 32 {
+		if ev.Kind == hook.KeyUp && ev.Keycode == 57 {
 			speedUp = false
 		}
 		if ev.Kind == hook.KeyHold {
-			//println(ev.Keycode)
+			//fmt.Println(ev.Keycode, ev.Rawcode, ev)
 			switch ev.Keycode {
-			case 17, 61000:
+			case 17, 61000, 57416:
 				if atomic.LoadInt64(&vector) != 2 {
 					atomic.StoreInt64(&vector, 8)
 				}
-			case 30, 61003:
+			case 30, 61003, 57419:
 				if atomic.LoadInt64(&vector) != 6 {
 					atomic.StoreInt64(&vector, 4)
 				}
-			case 31, 61008:
+			case 31, 61008, 57424:
 				if atomic.LoadInt64(&vector) != 8 {
 					atomic.StoreInt64(&vector, 2)
 				}
-			case 32, 61005:
+			case 32, 61005, 57421:
 				if atomic.LoadInt64(&vector) != 4 {
 					atomic.StoreInt64(&vector, 6)
 				}
