@@ -25,11 +25,11 @@ const (
 	baseSpeed = 100
 )
 
-var bodyArray []point //蛇点位记录数组
-var integral = 0      //积分
-var vector = int64(6) //方向 根据小数字键盘 2下 4左 6右 8上 方向来
-var speed = 400       //附加间隔时间
-var speedUp = false   //是否加速
+var bodyArray []point   //蛇点位记录数组
+var integral = 0        //积分
+var vector = int64(6)   //方向 根据小数字键盘 2下 4左 6右 8上 方向来
+var speed = 400         //附加间隔时间
+var speedUp = uint32(0) //是否加速
 
 type point struct {
 	x    int
@@ -40,7 +40,7 @@ type point struct {
 var foodP point
 
 func main() {
-	println("请回车开始")
+	println("请回车开始,调整窗口大小=调整游戏地图大小")
 	var a int
 	_, _ = fmt.Scanln(&a)
 	rand.Seed(time.Now().Unix())
@@ -53,7 +53,7 @@ func main() {
 			return
 		}
 		drawMap()
-		if speedUp {
+		if atomic.LoadUint32(&speedUp) == 1 {
 			time.Sleep(time.Millisecond * time.Duration(baseSpeed))
 		} else {
 			time.Sleep(time.Millisecond * time.Duration(baseSpeed+speed))
@@ -66,13 +66,12 @@ func listeningInput() {
 	defer hook.StopEvent()
 	for ev := range EvChan {
 		if ev.Kind == hook.KeyHold && ev.Keycode == 57 {
-			speedUp = true
+			atomic.StoreUint32(&speedUp, uint32(1))
 		}
 		if ev.Kind == hook.KeyUp && ev.Keycode == 57 {
-			speedUp = false
+			atomic.StoreUint32(&speedUp, uint32(0))
 		}
 		if ev.Kind == hook.KeyHold {
-			//fmt.Println(ev.Keycode, ev.Rawcode, ev)
 			switch ev.Keycode {
 			case 17, 61000, 57416:
 				if atomic.LoadInt64(&vector) != 2 {
@@ -184,7 +183,7 @@ func iniBody() {
 	}
 }
 func drawBar() {
-	fmt.Println(fmt.Sprintf("当前积分：%d", integral), speedUp)
+	fmt.Println(fmt.Sprintf("当前积分：%d", integral), "加速(空格):", atomic.LoadUint32(&speedUp) == 1)
 }
 func drawMap() {
 	clear()
