@@ -1,7 +1,7 @@
 # snake
 
 单文件 go 贪吃蛇
-
+wasd方向 空格开启关闭加速
 # 参与
 [OneFile](https://github.com/521xueweihan/OneFile) 汇集了仅一个文件，好玩的开源项目。
 

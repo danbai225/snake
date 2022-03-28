@@ -13,10 +13,37 @@ import (
 )
 
 /*
-#include <conio.h>
-char getcharGo(){
-	return getch();
-}
+#cgo windows CFLAGS: -D CGO_OS_WINDOWS=1
+#cgo darwin  CFLAGS: -D CGO_OS_DRWIN=1
+#cgo linux   CFLAGS: -D CGO_OS_LINUX=1
+
+#if defined(CGO_OS_WINDOWS)
+	const char* os = "windows";
+	#include <conio.h>
+	char getcharGo(){
+		return getch();
+	}
+#else
+	#include <termio.h>
+	#include <stdio.h>
+	char getcharGo()
+	{
+	int in;
+	struct termios new_settings;
+	struct termios stored_settings;
+	tcgetattr(0,&stored_settings);
+	new_settings = stored_settings;
+	new_settings.c_lflag &= (~ICANON);
+	new_settings.c_cc[VTIME] = 0;
+	tcgetattr(0,&stored_settings);
+	new_settings.c_cc[VMIN] = 1;
+	tcsetattr(0,TCSANOW,&new_settings);
+	in = getchar();
+	tcsetattr(0,TCSANOW,&stored_settings);
+	return in;
+	}
+#endif
+
 */
 import "C"
 
@@ -149,10 +176,10 @@ func next() bool {
 	//改变原来头部类型为身体
 	bodyArray[1].Type = body
 	//超过边界 结束
-	if newP.y > h || newP.y < 0 {
+	if newP.y >= h || newP.y < 0 {
 		return false
 	}
-	if newP.x > w || newP.x < 0 {
+	if newP.x >= w || newP.x < 0 {
 		return false
 	}
 	//撞到自己
@@ -170,7 +197,7 @@ func iniBody() {
 		println(err.Error())
 		return
 	}
-	h -= 1 //减去一行用来输出积分信息
+	h -= 2 //减去一行用来输出积分信息
 	bodyArray = []point{
 		{
 			x:    2,
@@ -191,6 +218,9 @@ func iniBody() {
 }
 func drawBar() {
 	fmt.Println(fmt.Sprintf("当前积分：%d", integral), "加速(空格):", atomic.LoadUint32(&speedUp) == 1)
+}
+func drawBottom() {
+	fmt.Print("---Bottom---")
 }
 func drawMap() {
 	clear()
@@ -217,6 +247,7 @@ func drawMap() {
 			print(out)
 		}
 	}
+	drawBottom()
 }
 
 //获取终端宽高
