@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	hook "github.com/robotn/gohook"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -12,6 +11,14 @@ import (
 	"sync/atomic"
 	"time"
 )
+
+/*
+#include <conio.h>
+char getcharGo(){
+	return getch();
+}
+*/
+import "C"
 
 var (
 	w = 0
@@ -62,34 +69,34 @@ func main() {
 }
 
 func listeningInput() {
-	EvChan := hook.Start()
-	defer hook.StopEvent()
-	for ev := range EvChan {
-		if ev.Kind == hook.KeyHold && ev.Keycode == 57 {
-			atomic.StoreUint32(&speedUp, uint32(1))
-		}
-		if ev.Kind == hook.KeyUp && ev.Keycode == 57 {
-			atomic.StoreUint32(&speedUp, uint32(0))
-		}
-		if ev.Kind == hook.KeyHold {
-			switch ev.Keycode {
-			case 17, 61000, 57416:
-				if atomic.LoadInt64(&vector) != 2 {
-					atomic.StoreInt64(&vector, 8)
-				}
-			case 30, 61003, 57419:
-				if atomic.LoadInt64(&vector) != 6 {
-					atomic.StoreInt64(&vector, 4)
-				}
-			case 31, 61008, 57424:
-				if atomic.LoadInt64(&vector) != 8 {
-					atomic.StoreInt64(&vector, 2)
-				}
-			case 32, 61005, 57421:
-				if atomic.LoadInt64(&vector) != 4 {
-					atomic.StoreInt64(&vector, 6)
-				}
+	for { //119 115 97 100    72 80 75 77
+		result := C.getcharGo()
+		if result == 32 {
+			loadUint32 := atomic.LoadUint32(&speedUp)
+			if loadUint32 == 0 {
+				atomic.StoreUint32(&speedUp, uint32(1))
+			} else {
+				atomic.StoreUint32(&speedUp, uint32(0))
 			}
+		}
+		switch result {
+		case 119, 72:
+			if atomic.LoadInt64(&vector) != 2 {
+				atomic.StoreInt64(&vector, 8)
+			}
+		case 97, 75:
+			if atomic.LoadInt64(&vector) != 6 {
+				atomic.StoreInt64(&vector, 4)
+			}
+		case 115, 80:
+			if atomic.LoadInt64(&vector) != 8 {
+				atomic.StoreInt64(&vector, 2)
+			}
+		case 100, 77:
+			if atomic.LoadInt64(&vector) != 4 {
+				atomic.StoreInt64(&vector, 6)
+			}
+
 		}
 	}
 }
