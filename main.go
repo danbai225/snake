@@ -16,15 +16,18 @@ import (
 #cgo windows CFLAGS: -D CGO_OS_WINDOWS=1
 #cgo darwin  CFLAGS: -D CGO_OS_DRWIN=1
 #cgo linux   CFLAGS: -D CGO_OS_LINUX=1
+#if defined(CGO_OS_DRWIN)
+	#include <termios.h>
+#elif defined(CGO_OS_LINUX)
+	#include <termio.h>
+#endif
 
 #if defined(CGO_OS_WINDOWS)
-	const char* os = "windows";
 	#include <conio.h>
 	char getcharGo(){
 		return getch();
 	}
 #else
-	#include <termio.h>
 	#include <stdio.h>
 	char getcharGo()
 	{
@@ -96,7 +99,7 @@ func main() {
 }
 
 func listeningInput() {
-	for { //119 115 97 100    72 80 75 77
+	for {
 		result := C.getcharGo()
 		if result == 32 {
 			loadUint32 := atomic.LoadUint32(&speedUp)
@@ -107,19 +110,19 @@ func listeningInput() {
 			}
 		}
 		switch result {
-		case 119, 72:
+		case 119, 72, 65:
 			if atomic.LoadInt64(&vector) != 2 {
 				atomic.StoreInt64(&vector, 8)
 			}
-		case 97, 75:
+		case 97, 75, 68:
 			if atomic.LoadInt64(&vector) != 6 {
 				atomic.StoreInt64(&vector, 4)
 			}
-		case 115, 80:
+		case 115, 80, 66:
 			if atomic.LoadInt64(&vector) != 8 {
 				atomic.StoreInt64(&vector, 2)
 			}
-		case 100, 77:
+		case 100, 77, 67:
 			if atomic.LoadInt64(&vector) != 4 {
 				atomic.StoreInt64(&vector, 6)
 			}
