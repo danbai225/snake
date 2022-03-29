@@ -134,6 +134,7 @@ func randFood() {
 	x := rand.Int63n(int64(w))
 	y := rand.Int63n(int64(h))
 	flg := false
+	//确保不会刷新到身体上
 	for _, p := range bodyArray {
 		if int64(p.x) == x && int64(p.y) == y {
 			flg = true
@@ -200,7 +201,7 @@ func iniBody() {
 		println(err.Error())
 		return
 	}
-	h -= 2 //减去一行用来输出积分信息
+	h -= 2 //减去两行用来输出额外信息
 	bodyArray = []point{
 		{
 			x:    2,
